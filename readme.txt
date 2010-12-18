@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: summary, statistics, stats, year
 Requires at least: 3.0.0
 Tested up to: 3.0.3
-Stable tag: 0.1
+Stable tag: 0.2
 
 Generate a brief summary of 2010 on your blog. See how many posts were written durig the year, who was the most active commenter etc.
 
@@ -39,8 +39,14 @@ Please send it to wpsummary [at] topa.pl :)
 == Screenshots ==
 
 1. Part of the summary: number of posts in each month and day of the week
+2. Welcome screen
 
 == Changelog ==
+
+= 0.2 =
+* Added simple charts to the summary
+* Added more data to the summary
+* Excluded drafts from the summary
 
 = 0.1 =
 * Initial release

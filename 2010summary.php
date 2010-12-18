@@ -3,7 +3,7 @@
 Plugin Name: 2010 Summary
 Plugin URI: http://tomasz.topa.pl/2010summary
 Description: Get a brief summary of 2010 on your blog
-Version: 0.1
+Version: 0.2
 Author: Tomasz Topa
 Author URI: http://tomasz.topa.pl
 License: GPL2
@@ -42,6 +42,11 @@ function y2010summary() {
 	<style type="text/css">
 	.y2010summaryList{font-size:11px;margin-left:3em;list-style:disc;}
 	#y2010summaryDonate{width:200px;float:right;text-align:center;padding:30px 0;}
+	.y2010summaryTable{margin: 0 0 0 10px;}
+	.y2010summaryTable td{font-size:11px;line-height:2em;padding:0.25em;overflow:hidden;}
+	.y2010summaryCol1{float:left;width:300px;overflow:hidden;}
+	.y2010summaryCol2{float:left;width:260px;overflow:hidden;}
+	.y2010summaryClear{clear:both;}
 	</style>
 	
 	<h2>2010 Summary - whole year of blogging summarized</h2>
@@ -79,7 +84,11 @@ function y2010summary() {
 // Insert the post into the database
   $postid=wp_insert_post( $my_post );
    
-   echo '<div class="updated"><p><strong>A draft of the new post has been created</strong>. You can now <a href="'.get_bloginfo('wpurl').'/wp-admin/post.php?post='.$postid.'&action=edit">edit it</a> and then publish.</p></div>';
+   echo '<p>&nbsp;</p><div class="updated"><p><strong>A draft of the new post has been created</strong>. You can now <a href="'.get_bloginfo('wpurl').'/wp-admin/post.php?post='.$postid.'&action=edit">edit it</a> and then publish.</p></div>';
+   echo'<p>&nbsp;</p><p>&nbsp;</p><form name="y2010summary_generate" method="post" action="">
+	<input type="submit" name="generateStats" class="button-primary" value="Regenerate Summary" /> 
+	<input type="hidden" name="y2010summary_generate" value="TRUE" />
+	</form>';
    
   } else {
 	echo '<form name="y2010summary_generate" method="post" action="">
@@ -96,9 +105,9 @@ function y2010summary_generate(){
 	global $wpdb;
 	
 	
-	$y2010summary_noposts = $wpdb->get_row("SELECT count($wpdb->posts.ID) as howmany FROM $wpdb->posts WHERE year(post_date)=2010 and post_type='post'");
+	$y2010summary_noposts = $wpdb->get_row("SELECT count($wpdb->posts.ID) as howmany FROM $wpdb->posts WHERE year(post_date)=2010 and post_type='post' and post_status='publish'");
     
-	$y2010summary_nopages = $wpdb->get_row("SELECT count($wpdb->posts.ID) as howmany FROM $wpdb->posts WHERE year(post_date)=2010 and post_type='page'");
+	$y2010summary_nopages = $wpdb->get_row("SELECT count($wpdb->posts.ID) as howmany FROM $wpdb->posts WHERE year(post_date)=2010 and post_type='page' and post_status='publish'");
 	
 	$y2010summary_noattach = $wpdb->get_row("SELECT count($wpdb->posts.ID) as howmany FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='attachment'");	
 	
@@ -111,10 +120,12 @@ function y2010summary_generate(){
 	$y2010summary_nocommr = $wpdb->get_row("SELECT count($wpdb->comments.comment_ID) as howmany FROM $wpdb->comments WHERE year($wpdb->comments.comment_date)=2010 and comment_type!='trackback' and $wpdb->comments.user_id>0 and $wpdb->comments.comment_approved=1");	
 	
 	$y2010summary_months = $wpdb->get_results("SELECT count($wpdb->posts.ID) as howmany, month($wpdb->posts.post_date) as postmonth FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='post' group by postmonth order by postmonth asc");
-
-	$y2010summary_days = $wpdb->get_results("SELECT count($wpdb->posts.ID) as howmany, dayname($wpdb->posts.post_date) as postday, dayofweek($wpdb->posts.post_date) as postday2 FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='post' group by postday order by postday2 asc");	
 	
-	echo mysql_error();
+	$y2010summary_hours = $wpdb->get_results("SELECT count($wpdb->posts.ID) as howmany, hour($wpdb->posts.post_date) as posthour FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='post' group by posthour order by posthour asc");
+
+	
+	$y2010summary_days = $wpdb->get_results("SELECT count($wpdb->posts.ID) as howmany, dayname($wpdb->posts.post_date) as postday, dayofweek($wpdb->posts.post_date) as postday2 FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='post' group by postday order by postday2 asc");	
+
 	
 	$y2010summary_postsbyauthors = $wpdb->get_results("SELECT count($wpdb->posts.ID) as howmany, $wpdb->posts.post_author FROM $wpdb->posts WHERE year(post_date)=2010 and $wpdb->posts.post_type='post' group by $wpdb->posts.post_author order by howmany desc");
 	
@@ -122,17 +133,43 @@ function y2010summary_generate(){
 	
 	$y2010summary_commenters = $wpdb->get_results("SELECT count($wpdb->comments.comment_ID) as howmany,$wpdb->comments.comment_author FROM $wpdb->comments WHERE year($wpdb->comments.comment_date)=2010 and comment_type!='trackback' and $wpdb->comments.comment_approved=1 and user_id=0 group by $wpdb->comments.comment_author order by howmany desc limit 10");
 
+	$y2010summary_commentsday = $wpdb->get_results("SELECT count($wpdb->comments.comment_ID) as howmany, dayname($wpdb->comments.comment_date) as commentday, dayofweek($wpdb->comments.comment_date) as commentday2 FROM $wpdb->comments WHERE year($wpdb->comments.comment_date)=2010 and comment_type!='trackback' and $wpdb->comments.comment_approved=1 group by commentday order by commentday2 asc");
+	
+	$y2010summary_commentmonths = $wpdb->get_results("SELECT count($wpdb->comments.comment_ID) as howmany, month($wpdb->comments.comment_date) as commentmonth FROM $wpdb->comments WHERE year($wpdb->comments.comment_date)=2010 and comment_type!='trackback' and $wpdb->comments.comment_approved=1 group by commentmonth order by commentmonth asc");
+	
+	
+	$y2010summary_commenthours = $wpdb->get_results("SELECT count($wpdb->comments.comment_ID) as howmany, hour($wpdb->comments.comment_date) as commenthour FROM $wpdb->comments WHERE year($wpdb->comments.comment_date)=2010 and comment_type!='trackback' and $wpdb->comments.comment_approved=1 group by commenthour order by commenthour asc");
 	
     foreach ($y2010summary_commenters as $y2010summary_commenter) {
 		$y2010summary_commentdata.='<li>'.$y2010summary_commenter->comment_author.': <strong>'.$y2010summary_commenter->howmany.'</strong> comments</li>';
 	}
 	
 	foreach ($y2010summary_months as $y2010summary_month) {
-		$y2010summary_monthdata.='<li>'.date("F",mktime(0,0,0,$y2010summary_month->postmonth,1,2010)).': <strong>'.$y2010summary_month->howmany.'</strong> posts</li>';
+		$y2010summary_monthdata.='<tr><td style="width:110px;text-align:right;font-weight:bold;">'.date("F",mktime(0,0,0,$y2010summary_month->postmonth,1,2010)).':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_month->howmany/$y2010summary_noposts->howmany*70).'px"></div> &nbsp; '.$y2010summary_month->howmany.' ('.round($y2010summary_month->howmany/$y2010summary_noposts->howmany*100,2).'%)</td></tr>';
+	}
+	
+	foreach ($y2010summary_commentmonths as $y2010summary_commentmonth) {
+		$y2010summary_commentmonthdata.='<tr><td style="width:110px;text-align:right;font-weight:bold;">'.date("F",mktime(0,0,0,$y2010summary_commentmonth->commentmonth,1,2010)).':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_commentmonth->howmany/$y2010summary_nocomm->howmany*70).'px"></div> &nbsp; '.$y2010summary_commentmonth->howmany.' ('.round($y2010summary_commentmonth->howmany/$y2010summary_nocomm->howmany*100,2).'%)</td></tr>';
+	}
+	
+	foreach ($y2010summary_hours as $y2010summary_hour) {
+	$y2010summary_hourdata.='<tr><td style="width:50px;text-align:right;font-weight:bold;">'.$y2010summary_hour->posthour.':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_hour->howmany/$y2010summary_noposts->howmany*70).'px"></div> &nbsp; '.$y2010summary_hour->howmany.' ('.round($y2010summary_hour->howmany/$y2010summary_noposts->howmany*100,2).'%)</td></tr>';
+	}
+	
+	foreach ($y2010summary_commenthours as $y2010summary_commenthour) {
+	$y2010summary_commenthourdata.='<tr><td style="width:50px;text-align:right;font-weight:bold;">'.$y2010summary_commenthour->commenthour.':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_commenthour->howmany/$y2010summary_nocomm->howmany*70).'px"></div> &nbsp; '.$y2010summary_commenthour->howmany.' ('.round($y2010summary_commenthour->howmany/$y2010summary_nocomm->howmany*100,2).'%)</td></tr>';
 	}
 	
 	foreach ($y2010summary_days as $y2010summary_day) {
-		$y2010summary_daydata.='<li>'.$y2010summary_day->postday.': <strong>'.$y2010summary_day->howmany.'</strong> posts</li>';
+		
+		$y2010summary_daydata.='<tr><td style="width:110px;text-align:right;font-weight:bold;">'.$y2010summary_day->postday.':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_day->howmany/$y2010summary_noposts->howmany*70).'px"></div> &nbsp; '.$y2010summary_day->howmany.' ('.round($y2010summary_day->howmany/$y2010summary_noposts->howmany*100,2).'%)</td></tr>';
+		
+	}
+	
+	foreach ($y2010summary_commentsday as $y2010summary_commentday) {
+		
+		$y2010summary_commentdaydata.='<tr><td style="width:110px;text-align:right;font-weight:bold;">'.$y2010summary_commentday->commentday.':</td><td><div class="y2010summaryChartBar" style="width:'.round($y2010summary_commentday->howmany/$y2010summary_nocomm->howmany*70).'px"></div> &nbsp; '.$y2010summary_commentday->howmany.' ('.round($y2010summary_commentday->howmany/$y2010summary_nocomm->howmany*100,2).'%)</td></tr>';
+		
 	}
 	
 	foreach ($y2010summary_topcom as $y2010summary_post) {
@@ -152,14 +189,24 @@ function y2010summary_generate(){
 
 	
 	$y2010summary_text.='
-	
+	<style type="text/css">.y2010summaryChartBar{height:15px;background:#1A87D5;display:inline-block;}</style>
 	<p>In 2010 you wrote <strong>'.$y2010summary_noposts->howmany.'</strong> posts and added <strong>'.$y2010summary_nopages->howmany.' pages</strong> to this blog, with <strong>'.$y2010summary_noattach->howmany.' attachments</strong> in total.</p>
 	<p>&nbsp;</p>
+	<div class="y2010summaryCol1">
 	<p><strong>The number of posts in each month:</strong></p>
-	<ul class="y2010summaryList">'.$y2010summary_monthdata.'</ul>
+	<table class="y2010summaryTable">'.$y2010summary_monthdata.'</table>
+	
 	<p>&nbsp;</p>
+	
 	<p><strong>The number of posts in each day of week:</strong></p>
-	<ul class="y2010summaryList">'.$y2010summary_daydata.'</ul>
+	<table class="y2010summaryTable">'.$y2010summary_daydata.'</table>
+	
+	</div>
+	<div class="y2010summaryCol2">
+	<p><strong>At what hours you publish new posts:</strong></p>
+	<table class="y2010summaryTable">'.$y2010summary_hourdata.'</table>
+	</div>
+	<div class="y2010summaryClear"></div>
 	<p>&nbsp;</p>
 	<p>In 2010 your posts were commented <strong>'.$y2010summary_nocomm->howmany.'</strong> times, from which <strong>'.$y2010summary_nocommr->howmany.'</strong> comments ('.round($y2010summary_nocommr->howmany/$y2010summary_nocomm->howmany*100,2).'%) were written by registered users/authors.</p>
 	<p>&nbsp;</p>
@@ -169,11 +216,22 @@ function y2010summary_generate(){
 	<p><strong>TOP 10 most commented posts in 2010:</strong></p>
 	<ul class="y2010summaryList">'.$y2010summary_postdata.'</ul>
 	<p>&nbsp;</p>
-	
+	<div class="y2010summaryCol1">
+	<p><strong>The number of comments in each month:</strong></p>
+	<table class="y2010summaryTable">'.$y2010summary_commentmonthdata.'</table>
+	<p>&nbsp;</p>
+	<p><strong>On what days people comment:</strong></p>
+	<table class="y2010summaryTable">'.$y2010summary_commentdaydata.'</table>
+	</div>
+	<div class="y2010summaryCol2">
+	<p><strong>At what hours people comment:</strong></p>
+	<table class="y2010summaryTable">'.$y2010summary_commenthourdata.'</table>
+	</div>
+	<div class="y2010summaryClear"></div>
 	';
 	
 	if($y2010summary_noauthors->howmany>1){
-		$y2010summary_text.='<p><strong>This blog has many authors.</strong> Below you can find the number of posts each one wrote:</p>
+		$y2010summary_text.='<p><strong>This blog has many authors.</strong> Here is the number of posts each one wrote:</p>
 		<ul class="y2010summaryList">'.$y2010summary_authordata.'</ul>
 		<p>&nbsp;</p>
 		<p>And the number of comments each one wrote:</p>
