@@ -105,8 +105,8 @@ $y2010summary_translations=array('en','pl');
 		'pl'=>'Godziny o których publikowałeś nowe wpisy'
 	);		
   	$y2010summary_trans[18]=array(
-		'en'=>'In 2010 your posts were commented <strong>%s</strong> times, from which <strong>%s</strong> comments (%s%) were written by registered users/authors.',
-		'pl'=>'W 2010 roku Twoje posty zostały skomentowane <strong>%s</strong> razy, w tym <strong>%s</strong> komentarzy (%s%) zostało napisanych przez zarejestrowanych użytkowników/autorów.'
+		'en'=>'In 2010 your posts were commented <strong>%s</strong> times, from which <strong>%s</strong> comments (%s percent) were written by registered users/authors.',
+		'pl'=>'W 2010 roku Twoje posty zostały skomentowane <strong>%s</strong> razy, w tym <strong>%s</strong> komentarzy (%s procent) zostało napisanych przez zarejestrowanych użytkowników/autorów.'
 	);		
   	$y2010summary_trans[19]=array(
 		'en'=>'TOP 10 commenters in 2010',
